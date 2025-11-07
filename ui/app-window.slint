@@ -1,0 +1,139 @@
+import { VerticalBox, HorizontalBox, Button, CheckBox, LineEdit } from "std-widgets.slint";
+import { Background, CountdownText, DragArea, FloatButton } from "components.slint";
+
+export component AppWindow inherits Window {
+    title: "截止日期倒计时";
+    background: transparent;
+    no-frame: true;
+    always-on-top: true;
+    width: 370px;
+    height: 250px;
+
+    // 属性声明
+    in property <string> countdown-text;
+
+    // 回调声明
+    callback move-window(length, length);
+    callback close-window();
+    callback open-settings();
+    callback save-settings(string, string, bool);
+
+    DragArea {
+        on-move-window(offset-x, offset-y) => {
+            move-window(offset-x, offset-y);
+        }
+    }
+
+    Background {}
+
+    VerticalBox {
+        width: 95%;
+        height: 90%;
+        HorizontalBox {
+            alignment: end;
+            FloatButton {
+                icon: @image-url("assets/close.svg");
+                clicked => {
+                    close-window();
+                }
+            }
+        }
+        HorizontalBox{
+            padding-right: 5px;
+            CountdownText {
+                text: root.countdown-text;
+            }
+        }
+        HorizontalBox {
+            alignment: end;
+            FloatButton {
+                icon: @image-url("assets/settings.svg");
+                clicked => {
+                    open-settings();
+                }
+            }
+        }
+    }
+}
+
+export component SettingsWindow inherits Window {
+    title: "设置";
+    width: 400px;
+    height: 300px;
+
+    in-out property <string> input-title;
+    in-out property <string> input-date;
+    in-out property <bool> input-auto-start;
+
+    callback saved(string, string, bool);
+    callback window-closed();
+
+    Rectangle {
+        border-radius: 8px;
+
+        VerticalBox {
+            padding: 20px;
+            spacing: 15px;
+
+            Text {
+                text: "倒计时设置";
+                font-size: 18px;
+                font-weight: 300;
+                horizontal-alignment: center;
+            }
+
+            HorizontalBox {
+                spacing: 10px;
+                Text {
+                    text: "标题:";
+                    width: 80px;
+                }
+                title-input := LineEdit {
+                    text: root.input-title;
+                }
+            }
+
+            HorizontalBox {
+                spacing: 10px;
+                Text {
+                    text: "截止日期:";
+                    width: 80px;
+                }
+                date-input := LineEdit {
+                    text: root.input-date;
+                    placeholder-text: "YYYY-MM-DD";
+                }
+            }
+
+            HorizontalBox {
+                spacing: 10px;
+                Text {
+                    text: "开机自启动:";
+                    width: 80px;
+                }
+                auto-start-checkbox := CheckBox {
+                    checked: root.input-auto-start;
+                }
+            }
+
+            HorizontalBox {
+                alignment: end;
+                spacing: 10px;
+
+                Button {
+                    text: "取消";
+                    clicked => {
+                        root.window-closed();
+                    }
+                }
+
+                Button {
+                    text: "保存";
+                    clicked => {
+                        root.saved(title-input.text, date-input.text, auto-start-checkbox.checked);
+                    }
+                }
+            }
+        }
+    }
+}
